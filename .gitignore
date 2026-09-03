@@ -1,0 +1,82 @@
+# 虚拟环境
+.venv/
+venv/
+env/
+ENV/
+
+# Python 字节码与打包
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+jupyter_notebook_config.py
+
+# 数据集（原始大文件不入 Git，需要时用 Git LFS 或网盘链接）
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+*.parquet
+*.avro
+*.orc
+*.h5
+*.hdf5
+*.feather
+*.zip
+*.tar.gz
+*.rar
+
+# 模型权重与中间产物
+models/
+*.pkl
+*.pickle
+*.joblib
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+runs/
+outputs/
+mlruns/
+
+# Spark / Hadoop / Flink
+spark-warehouse/
+metastore_db/
+metastore_db_db/
+derby.log
+.hadoop/
+.checkpoint/
+*_SUCCESS
+*.crc
+
+# 环境变量与密钥（重要：绝不提交）
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+secrets.yaml
+
+# 编辑器与系统
+.vscode/*
+!.vscode/settings.json.example
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志与缓存
+*.log
+logs/
+.cache/
+.pytest_cache/
+.mypy_cache/
