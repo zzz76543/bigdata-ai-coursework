@@ -9,7 +9,10 @@ set -uo pipefail
 REPO_NAME="bigdata-ai-coursework"
 REPO_DESC="大数据与人工智能课程作业仓库"
 DIRECT_URL="https://github.com"
+# 通道按实测可用性排序（2026-09-03 校验）
+# gh.idayer.com 同时支持网页代理与 git 协议，实测最稳
 MIRRORS=(
+  "https://gh.idayer.com"
   "https://ghproxy.net"
   "https://gh-proxy.com"
   "https://ghproxy.cc"

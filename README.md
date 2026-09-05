@@ -33,6 +33,36 @@ pip install -r requirements.txt
 - 实验结论同步更新到 `reports/`，方便期末复盘
 - 提交信息统一格式：`hw01: 完成数据清洗与特征工程`
 
+## 仓库地址
+
+<https://github.com/zzz76543/bigdata-ai-coursework>
+
+## 克隆到新机器
+
+```bash
+# 方式一：SSH（推荐，配置一次永久有效）
+git clone git@github.com:zzz76543/bigdata-ai-coursework.git
+
+# 方式二：HTTPS（SSH 连不上时用这个）
+git clone https://github.com/zzz76543/bigdata-ai-coursework.git
+```
+
+## 日常推送
+
+```bash
+git add .                            # 暂存改动
+git commit -m "hw01: 完成数据清洗"    # 提交
+git push origin main                 # 推送（走 SSH）
+```
+
+若 SSH 通道被网络阻断，改走备用通道：
+
+```bash
+git push https-origin main           # 走 HTTPS（凭据已存本机，不需再输密码）
+```
+
+推送前先 `git pull --rebase origin main`，避免与他人改动冲突。
+
 ## 工具链
 
 | 类别 | 主要工具 |
