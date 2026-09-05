@@ -59,22 +59,33 @@ git remote -v                   # 查看远端地址
 
 **推送前先拉取是好习惯**：`git pull --rebase && git push`
 
-## 六、本仓库的网络说明
+## 六、本仓库的双通道配置
 
-本机直连 `github.com` 会被拦截（CONNECT 502），因此远端走镜像通道：
+本机到 GitHub 配了两条通道，**彼此独立**——一条断了另一条可能照常用：
 
-```bash
-git remote -v
-# origin  https://ghproxy.net/https://github.com/<你的账号>/bigdata-ai-coursework.git
-```
-
-手动修复远端地址：
+| remote | 地址 | 用途 | 特点 |
+| --- | --- | --- | --- |
+| `origin` | `git@github.com:zzz76543/bigdata-ai-coursework.git` | 日常主用 | SSH 密钥，**永久有效**，不用管令牌 |
+| `https-origin` | `https://github.com/zzz76543/bigdata-ai-coursework.git` | SSH 不通时备用 | 令牌已存本机，不用再输密码 |
 
 ```bash
-git remote set-url origin https://ghproxy.net/https://github.com/<你的账号>/bigdata-ai-coursework.git
+git push origin main        # 主：走 SSH
+git push https-origin main  # 备：走 HTTPS
 ```
 
-若镜像失效，重跑仓库根目录下的 `github-sync.sh` 可自动换用其他镜像。
+**关于网络**：本机访问 `github.com` 是**间歇性阻断**，不是永久封锁——同一天内可能通断翻转好几次，等一会儿往往自己恢复。SSH 与 HTTPS 独立阻断，实测过 SSH 全通而 HTTPS 全断的情况，反之也有。
+
+**卡住时先探测再动手**，别急着改配置：
+
+```bash
+# 测 HTTPS（200 = 通，000 = 断）
+curl -s -o /dev/null -w "%{http_code}\n" --max-time 10 https://github.com/
+
+# 测 SSH（看到 successfully authenticated = 通）
+ssh -T git@github.com
+```
+
+SSH 返回 `Permission denied (publickey)` 说明**通道是通的**，只是公钥没配好；返回 `Connection reset` 或超时才是通道被掐。两者处理方式完全不同，别搞混。
 
 ## 七、生成访问令牌（PAT）
 
