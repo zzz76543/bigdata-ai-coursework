@@ -124,7 +124,37 @@ notepad "$env:USERPROFILE\.git-credentials"
 
 删除对应行后重新推送，会再次提示输入。
 
-## 九、常见问题
+## 九、WorkBuddy 环境下的推送坑（2026-09-05 实测）
+
+直接 `git push` 会挂住，原因有两个：
+
+**坑 1：系统代理 `127.0.0.1:60050` 在 HTTPS git 协议认证握手阶段 hang 住**
+GitHub 对 `git-receive-pack` 先回 401，客户端用 Basic 凭证发起 TLS 重协商时被代理卡死。`curl` 走同一个代理没问题，普通 HTTPS 也都通 —— 只 git 协议的认证重协商死。
+
+**坑 2：Git for Windows 默认 `credential-helper-selector` 启 GUI 弹窗**
+非交互终端永远等不到用户点"使用 GitHub 凭据"。
+
+**绕开组合**（已实测可用）：
+
+```bash
+PAT=$(grep -oP 'ghp_[A-Za-z0-9]+' ~/.git-credentials | head -1)
+
+env -u HTTPS_PROXY -u https_proxy -u HTTP_PROXY -u http_proxy \
+  git -c credential.helper= \
+      -c http.extraHeader= \
+      -c credential.useHttpPath=false \
+      push "https://x-access-token:${PAT}@github.com/<owner>/<repo>.git" main
+```
+
+这套逻辑已经固化在 `github-sync.sh`（仓库内）和 `push-when-online.sh`（仓库外守卫）的 `safe_push` 函数里，日常使用直接调用脚本即可。
+
+**症状诊断**：
+- `git push` 静默卡住，stderr 只有 `Pushing to https://...` → 两个坑之一
+- `GIT_TRACE=1` 看 trace，卡在 `credential-helper-selector get` → 坑 2
+- 卡在 `schannel: renegotiating SSL/TLS connection` 后 timeout → 坑 1
+- 最干脆的兜底：用 `push_via_api.py`（走 REST API，完全不碰 git 协议）
+
+## 十、常见问题
 
 **`failed to push some refs`**
 远端有新提交，先执行 `git pull --rebase origin main` 再推送。

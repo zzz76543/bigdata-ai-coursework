@@ -19,6 +19,29 @@ MIRRORS=(
   "https://gh-proxy.net"
 )
 
+# 提取 PAT
+extract_pat() {
+  grep -oP 'ghp_[A-Za-z0-9]+' "$HOME/.git-credentials" 2>/dev/null | head -1
+}
+
+# 安全的 git push：绕代理 + 禁用凭证弹窗 + URL 内嵌 PAT
+# 原因：WorkBuddy 系统代理在 HTTPS git 协议认证握手阶段 hang 住；
+#       Git for Windows 默认 credential-helper-selector 会启 GUI 弹窗等待用户
+# 用法：safe_push <owner> <repo> [branch]
+safe_push() {
+  local owner="$1" repo="$2" branch="${3:-main}"
+  local pat
+  pat=$(extract_pat)
+  if [ -z "$pat" ]; then
+    echo "[错误] ~/.git-credentials 里找不到 ghp_ 开头的 PAT"; return 1
+  fi
+  env -u HTTPS_PROXY -u https_proxy -u HTTP_PROXY -u http_proxy \
+    git -c credential.helper= \
+        -c http.extraHeader= \
+        -c credential.useHttpPath=false \
+      push "https://x-access-token:${pat}@github.com/${owner}/${repo}.git" "$branch"
+}
+
 echo "=============================================="
 echo "  GitHub 同步助手"
 echo "=============================================="
@@ -83,13 +106,17 @@ echo ">> [4/5] 探测可用通道（这步会尝试实际握手）..."
 WORKING_URL=""
 
 # 先试直连
-if timeout 20 git ls-remote "https://${GH_USER}:${GH_TOKEN}@github.com/${GH_LOGIN}/${REPO_NAME}.git" HEAD >/dev/null 2>&1; then
+if timeout 20 env -u HTTPS_PROXY -u https_proxy -u HTTP_PROXY -u http_proxy \
+   git -c credential.helper= -c http.extraHeader= -c credential.useHttpPath=false \
+   ls-remote "https://x-access-token:${GH_TOKEN}@github.com/${GH_LOGIN}/${REPO_NAME}.git" HEAD >/dev/null 2>&1; then
   WORKING_URL="https://github.com/${GH_LOGIN}/${REPO_NAME}.git"
   echo "    [直连] 可用"
 else
   echo "    [直连] 不可用"
   for M in "${MIRRORS[@]}"; do
-    if timeout 25 git ls-remote "${M}/https://github.com/${GH_LOGIN}/${REPO_NAME}.git" HEAD >/dev/null 2>&1; then
+    if timeout 25 env -u HTTPS_PROXY -u https_proxy -u HTTP_PROXY -u http_proxy \
+       git -c credential.helper= -c http.extraHeader= -c credential.useHttpPath=false \
+       ls-remote "${M}/https://github.com/${GH_LOGIN}/${REPO_NAME}.git" HEAD >/dev/null 2>&1; then
       WORKING_URL="${M}/https://github.com/${GH_LOGIN}/${REPO_NAME}.git"
       echo "    [镜像] ${M} 可用"
       break
@@ -134,7 +161,7 @@ echo "    远端地址：$WORKING_URL"
 echo "    正在推送..."
 echo ""
 
-if git push -u origin main; then
+if safe_push "$GH_LOGIN" "$REPO_NAME"; then
   echo ""
   echo "=============================================="
   echo "  推送成功！"
