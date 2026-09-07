@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念关系 · 上下文 / Agent / Skill</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --ink-2:#555; --ink-3:#8a8a8a;
+    --line:#e3e3e3; --bg:#fff; --bg-soft:#f7f7f5; --code-bg:#f4f4f4;
+    --accent:#1a7f37;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+       color:var(--ink);background:var(--bg);line-height:1.8;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:840px;margin:0 auto;padding:48px 28px 96px}
+  header{margin-bottom:36px;border-bottom:1px solid var(--line);padding-bottom:26px}
+  .kicker{font-size:12.5px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase;margin-bottom:12px}
+  h1{font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+  .sub{color:var(--ink-2);margin-top:12px;font-size:15.5px;max-width:62ch}
+  section{margin-top:44px}
+  .sec-h{display:flex;align-items:baseline;gap:12px;font-size:21px;font-weight:700;
+         margin-bottom:14px;letter-spacing:-.01em}
+  .sec-h .no{color:var(--ink-3);font-size:14px;font-weight:600;letter-spacing:.06em}
+  p{color:var(--ink);margin-bottom:12px}
+  p.note{color:var(--ink-2);font-size:14.5px}
+  .quote{border-left:3px solid var(--accent);background:var(--bg-soft);
+         padding:14px 18px;margin:16px 0;font-size:15px;color:var(--ink-2)}
+  .quote b{color:var(--ink)}
+  ul,ol{margin:10px 0 14px 22px}
+  li{margin-bottom:8px}
+  h3{font-size:16px;font-weight:650;margin:24px 0 10px}
+  table{width:100%;border-collapse:collapse;margin:14px 0 8px;font-size:14.5px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--bg-soft);font-weight:650;font-size:13.5px;white-space:nowrap}
+  code{background:var(--code-bg);padding:1px 6px;border-radius:4px;font-size:13.5px;
+       font-family:"SF Mono",ui-monospace,Consolas,Menlo,monospace}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--line)}
+  a:hover{border-color:var(--accent)}
+  .diagram{margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--bg-soft)}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:13px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">概念关系说明</div>
+    <h1>上下文、Agent、Skill 三者如何串成一条能力闭环</h1>
+    <p class="sub">上下文是 Agent 的"燃料"，Agent 是"行动者"，Skill 是 Agent 反复行动后沉淀出的"可复用能力"——三者不是并列的三个词，而是一条首尾相接的循环。</p>
+  </header>
+
+  <section>
+    <div class="sec-h"><span class="no">01</span>一句话总览</div>
+    <table>
+      <tr><th>概念</th><th>一句话定位</th><th>在闭环里的角色</th></tr>
+      <tr><td>上下文（Context）</td><td>模型当下能参考的全部文本，是它的"工作记忆"</td><td>燃料 / 记忆</td></tr>
+      <tr><td>Agent（智能体）</td><td>能调用工具、自己决定下一步的 AI</td><td>行动者 / 决策者</td></tr>
+      <tr><td>Skill（技能）</td><td>把成功做法打包成的可复用流程</td><td>可复用的能力</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">02</span>关系流程图</div>
+    <div class="diagram">
+      <svg viewBox="0 0 680 470" width="100%" role="img" aria-label="上下文、Agent、Skill 的能力闭环图">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#1a7f37"/>
+          </marker>
+        </defs>
+
+        <!-- 节点：上下文 -->
+        <rect x="220" y="30" width="240" height="96" rx="10" fill="#ffffff" stroke="#1a7f37" stroke-width="2"/>
+        <text x="340" y="66" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1a1a">上下文</text>
+        <text x="340" y="90" text-anchor="middle" font-size="13" fill="#555">Context · 工作记忆</text>
+        <text x="340" y="110" text-anchor="middle" font-size="12" fill="#8a8a8a">决定 Agent 知道什么</text>
+
+        <!-- 节点：Agent -->
+        <rect x="220" y="187" width="240" height="96" rx="10" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+        <text x="340" y="223" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1a1a">Agent</text>
+        <text x="340" y="247" text-anchor="middle" font-size="13" fill="#555">智能体 · 行动者</text>
+        <text x="340" y="267" text-anchor="middle" font-size="12" fill="#8a8a8a">根据上下文做决策、执行任务</text>
+
+        <!-- 节点：Skill -->
+        <rect x="220" y="344" width="240" height="96" rx="10" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+        <text x="340" y="380" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1a1a">Skill</text>
+        <text x="340" y="404" text-anchor="middle" font-size="13" fill="#555">技能 · 可复用能力</text>
+        <text x="340" y="424" text-anchor="middle" font-size="12" fill="#8a8a8a">把 Agent 的成功路径沉淀下来</text>
+
+        <!-- 箭头 1：上下文 → Agent -->
+        <line x1="340" y1="126" x2="340" y2="180" stroke="#1a7f37" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="354" y="156" font-size="12" fill="#1a7f37">① 注入记忆与背景</text>
+
+        <!-- 箭头 2：Agent → Skill -->
+        <line x1="340" y1="283" x2="340" y2="337" stroke="#1a1a1a" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="354" y="314" font-size="12" fill="#555">② 反复执行，沉淀成套路</text>
+
+        <!-- 箭头 3：Skill 回环 → 上下文 -->
+        <path d="M220,392 L120,392 L120,78 L214,78" fill="none" stroke="#1a7f37" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+        <text x="88" y="240" font-size="12" fill="#1a7f37" transform="rotate(-90 88 240)" text-anchor="middle">③ 按需加载，仍需上下文承载</text>
+      </svg>
+      <div class="legend">
+        <span>① 上下文 → Agent：给 Agent 喂记忆和背景，Agent 才能做对决策</span>
+        <span>② Agent → Skill：Agent 反复做同一类任务，把成功路径固化成 Skill</span>
+        <span>③ Skill → 上下文：Agent 按需加载 Skill，加载本身又占用、依赖上下文</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">03</span>重点一：上下文如何影响 Agent 的工作</div>
+    <p><b>上下文是 Agent 做决策的全部依据，它的质量直接决定 Agent 的表现上限。</b></p>
+    <ul>
+      <li><b>Agent 只会"在上下文里思考"。</b>它不知道上下文之外的东西。所以 Agent 能不能想起"这个坑之前踩过"，取决于这条经验有没有被放进上下文。</li>
+      <li><b>给对上下文，Agent 少犯错。</b>我这几天让 Kai 干活，它之所以每次都能"接着上次继续"，是因为记忆文件里的"网络会间歇阻断""PAT 要勾 repo 主项"这些结论被自动注入了上下文，而不是它真的"记得"。</li>
+      <li><b>上下文也不是越多越好。</b>塞得太多会触发 context rot，反而让 Agent 抓不住重点。所以好的上下文要"精选"，把最有用的信息放进去，而不是把历史全摊开。</li>
+    </ul>
+    <p class="quote">一句话：<b>上下文决定 Agent"知道什么"，而"知道什么"决定了它能做成什么样。</b></p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">04</span>重点二：Skill 如何沉淀可复用的任务知识</div>
+    <p><b>Agent 做一次是"经验"，把经验结构化写成 Skill，才变成"能力"。</b>这一步是从"碰巧成功"到"稳定复现"的关键跨越。</p>
+    <ul>
+      <li><b>经验是散的，Skill 是结构化的。</b>Agent 某次成功可能靠临场发挥，下次未必复现；Skill 把"输入、步骤、输出、自检"写成固定流程，让结果稳定。</li>
+      <li><b>Skill 让"一次性正确"变成"每次都正确"。</b>以我这周的经历为例：Kai 摸索出的"绕代理 + 禁弹窗 + 内嵌令牌"推送办法，如果只留在聊天里，下次还要重新踩坑；写进 <code>safe_push</code> 之后，每次推送直接调用。</li>
+      <li><b>Skill 又反过来增强 Agent。</b>Agent 加载 Skill 后，相当于"临时获得了一项专门能力"——这正是闭环的意义：Agent 沉淀出 Skill，Skill 又让 Agent 更强。</li>
+    </ul>
+    <p class="quote">一句话：<b>上下文让 Agent"会想"，Skill 让 Agent"会做"，而 Agent 在两者之间把经验变成能力。</b></p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">05</span>关系小结</div>
+    <p>三者的关系可以用一句话收束：</p>
+    <p><b>上下文是 Agent 的记忆，Skill 是 Agent 的肌肉记忆；Agent 靠上下文做对每一次决策，再把反复做对的事沉淀成 Skill，而 Skill 的加载又离不开上下文——三者首尾相接，构成一个不断自我增强的循环。</b></p>
+    <p class="note">这份关系说明与三份概念学习资料配套，具体概念的展开见 <code>agent.html</code>、<code>llm-context.html</code>、<code>skill.html</code>。</p>
+  </section>
+
+</div>
+</body>
+</html>

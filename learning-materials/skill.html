@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习 · Skill（技能）</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --ink-2:#555; --ink-3:#8a8a8a;
+    --line:#e3e3e3; --bg:#fff; --bg-soft:#f7f7f5; --code-bg:#f4f4f4;
+    --accent:#1a7f37;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+       color:var(--ink);background:var(--bg);line-height:1.8;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:840px;margin:0 auto;padding:48px 28px 96px}
+  header{margin-bottom:36px;border-bottom:1px solid var(--line);padding-bottom:26px}
+  .kicker{font-size:12.5px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase;margin-bottom:12px}
+  h1{font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+  .sub{color:var(--ink-2);margin-top:12px;font-size:15.5px;max-width:62ch}
+  .tag{display:inline-block;margin-top:14px;font-size:12.5px;color:var(--accent);
+       border:1px solid var(--line);border-radius:20px;padding:4px 12px}
+  section{margin-top:44px}
+  .sec-h{display:flex;align-items:baseline;gap:12px;font-size:21px;font-weight:700;
+         margin-bottom:14px;letter-spacing:-.01em}
+  .sec-h .no{color:var(--ink-3);font-size:14px;font-weight:600;letter-spacing:.06em}
+  p{color:var(--ink);margin-bottom:12px}
+  p.note{color:var(--ink-2);font-size:14.5px}
+  .quote{border-left:3px solid var(--accent);background:var(--bg-soft);
+         padding:14px 18px;margin:16px 0;font-size:15px;color:var(--ink-2)}
+  .quote b{color:var(--ink)}
+  ul,ol{margin:10px 0 14px 22px}
+  li{margin-bottom:8px}
+  h3{font-size:16px;font-weight:650;margin:24px 0 10px}
+  table{width:100%;border-collapse:collapse;margin:14px 0 8px;font-size:14.5px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--bg-soft);font-weight:650;font-size:13.5px;white-space:nowrap}
+  code,pre{font-family:"SF Mono",ui-monospace,Consolas,Menlo,monospace}
+  code{background:var(--code-bg);padding:1px 6px;border-radius:4px;font-size:13.5px}
+  pre{background:var(--code-bg);padding:14px 16px;border-radius:6px;font-size:13px;
+      overflow-x:auto;margin:12px 0;line-height:1.6}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--line)}
+  a:hover{border-color:var(--accent)}
+  .src-list li{margin-bottom:12px}
+  .src-list .u{font-size:13px;color:var(--ink-3);word-break:break-all}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">概念学习资料 · 03 / 03</div>
+    <h1>Skill（技能）</h1>
+    <p class="sub">把"一次做成功的办法"打包成"以后照做就行"的可复用流程。</p>
+    <span class="tag">可复用 · 按需加载 · 渐进披露</span>
+  </header>
+
+  <section>
+    <div class="sec-h"><span class="no">01</span>个人解释</div>
+    <p>我的理解是：<b>Skill（技能）是给 Agent 的"操作手册"，把一套成熟的做法打包成它需要时能随时调用的能力</b>。</p>
+    <p>这周我亲眼见证了一个 Skill 的诞生过程：让 Kai 往 GitHub 推代码，反复卡在"系统代理导致 TLS 握手挂死"和"凭证弹窗等用户点击"两个坑上。Kai 摸索出一套固定解法——绕开代理、禁用凭证弹窗、URL 内嵌令牌。它没有让这套解法只留在聊天记录里，而是把它写成了一个可复用的函数 <code>safe_push</code>，以后每次推送直接调用，不再重新踩坑。</p>
+    <p>这就是 Skill 的本质：<b>把一次性的经验，沉淀成可复用的能力</b>。一次成功靠运气，把成功路径固化下来，才能每次都稳定复现。</p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">02</span>核心机制与组成</div>
+    <h3>Skill 长什么样</h3>
+    <p>最简形态，一个 Skill 就是一个目录，里面有一个 <code>SKILL.md</code> 文件。这个文件顶部必须有 YAML 元数据，至少两样：</p>
+    <pre>---
+name: concept-learning
+description: 把一个新概念生成结构化学习资料……
+---</pre>
+    <p><code>name</code> 是技能标识（小写字母/数字/连字符），<code>description</code> 讲清"这技能做什么、什么时候该用"。元数据下面是给 Agent 的指令正文，也可以再捆绑脚本、参考资料等文件。</p>
+    <h3>关键设计：渐进披露（Progressive Disclosure）</h3>
+    <p>Skill 不是一股脑全塞进上下文，而是分三层按需加载——这正好呼应了上一份资料讲的"上下文要省着用"：</p>
+    <table>
+      <tr><th>层级</th><th>内容</th><th>何时加载</th></tr>
+      <tr><td>第一层</td><td>name + description</td><td>启动时就注入系统提示，让 Agent 知道"有这么个技能"</td></tr>
+      <tr><td>第二层</td><td>SKILL.md 正文</td><td>Agent 判断任务匹配时，才读取全文</td></tr>
+      <tr><td>第三层</td><td>附带脚本/资料</td><td>正文里引用到、确实需要时才去读</td></tr>
+    </table>
+    <p class="note">这样 Agent 可以同时挂着很多技能，却只为当前任务消耗少量上下文。</p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">03</span>一个具体应用场景</div>
+    <p><b>场景：本次作业里那个"概念学习资料生成器"。</b></p>
+    <p>我要为"Agent、上下文、Skill"三个概念各写一份学习资料。如果我直接对 AI 说"帮我写 Agent 的学习资料"，得到的是一次性输出——换个概念（比如"注意力机制"）又要重新说一遍同样的要求，还得担心它忘了格式。</p>
+    <p>Skill 的解法是把"怎么生成一份概念学习资料"这件事本身写成一个技能：它规定了输入信息（概念名、背景、经历）、生成步骤（确认边界→查来源→写解释→拆机制→给场景→列混淆点→附来源→自检）、输出结构（五段式）、以及自检清单。有了它，无论下次是"注意力机制"还是"向量检索"，都是同一套流程，格式稳定、要求不会丢。</p>
+    <p>这正是 Skill 和"一次性提示词"的分水岭：<b>Skill 面向一类可重复的任务，而不是某一个具体问题。</b></p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">04</span>易混淆问题与使用边界</div>
+    <h3>最容易混淆的两点</h3>
+    <ul>
+      <li><b>Skill ≠ 一次性提示词。</b>提示词针对单次问题；Skill 是泛化的流程，能处理一类任务。判断标准：把主题换一个，它还能不能用？能用才是 Skill。</li>
+      <li><b>Skill ≠ 独立程序。</b>它本身不运行，是给 Agent 看的"操作说明 + 可选资源"，真正的执行仍由 Agent 完成。它更像"新员工入职手册"，而不是"一个能独立跑的服务"。</li>
+    </ul>
+    <h3>使用边界</h3>
+    <ul>
+      <li><b>来源要可信。</b>Skill 能给 Agent 注入指令、甚至让 Agent 执行代码，恶意 Skill 可能导致数据泄露。只用自己的或信任来源的 Skill，用前先审计。</li>
+      <li><b>不是越全越好。</b>Skill 写太长会挤占上下文，好的 Skill 用渐进披露把细节放到按需加载的文件里。</li>
+      <li><b>要维护。</b>Skill 里的做法会过时（比如某个命令失效了），要像维护代码一样更新它，否则会变成"过期的误导"。</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">05</span>可核查资料来源</div>
+    <ul class="src-list">
+      <li>
+        <b>Agent Skills Overview</b>（Claude 平台文档）—— SKILL.md 的 YAML 规范、name/description 字段约束、安全考量。<br>
+        <span class="u">https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview</span>
+      </li>
+      <li>
+        <b>Equipping agents for the real world with Agent Skills</b>（Anthropic 工程博客）—— 解释"渐进披露"设计原则与 Skill 的目录结构。<br>
+        <span class="u">https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills</span>
+      </li>
+    </ul>
+    <p class="note">"渐进披露三层加载""name/description 必填字段"等表述，来自上述两份官方来源。</p>
+  </section>
+
+</div>
+</body>
+</html>

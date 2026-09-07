@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习 · 大模型的上下文</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --ink-2:#555; --ink-3:#8a8a8a;
+    --line:#e3e3e3; --bg:#fff; --bg-soft:#f7f7f5; --code-bg:#f4f4f4;
+    --accent:#1a7f37;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+       color:var(--ink);background:var(--bg);line-height:1.8;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:840px;margin:0 auto;padding:48px 28px 96px}
+  header{margin-bottom:36px;border-bottom:1px solid var(--line);padding-bottom:26px}
+  .kicker{font-size:12.5px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase;margin-bottom:12px}
+  h1{font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+  .sub{color:var(--ink-2);margin-top:12px;font-size:15.5px;max-width:62ch}
+  .tag{display:inline-block;margin-top:14px;font-size:12.5px;color:var(--accent);
+       border:1px solid var(--line);border-radius:20px;padding:4px 12px}
+  section{margin-top:44px}
+  .sec-h{display:flex;align-items:baseline;gap:12px;font-size:21px;font-weight:700;
+         margin-bottom:14px;letter-spacing:-.01em}
+  .sec-h .no{color:var(--ink-3);font-size:14px;font-weight:600;letter-spacing:.06em}
+  p{color:var(--ink);margin-bottom:12px}
+  p.note{color:var(--ink-2);font-size:14.5px}
+  .quote{border-left:3px solid var(--accent);background:var(--bg-soft);
+         padding:14px 18px;margin:16px 0;font-size:15px;color:var(--ink-2)}
+  .quote b{color:var(--ink)}
+  ul,ol{margin:10px 0 14px 22px}
+  li{margin-bottom:8px}
+  h3{font-size:16px;font-weight:650;margin:24px 0 10px}
+  table{width:100%;border-collapse:collapse;margin:14px 0 8px;font-size:14.5px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--bg-soft);font-weight:650;font-size:13.5px;white-space:nowrap}
+  code,pre{font-family:"SF Mono",ui-monospace,Consolas,Menlo,monospace}
+  code{background:var(--code-bg);padding:1px 6px;border-radius:4px;font-size:13.5px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--line)}
+  a:hover{border-color:var(--accent)}
+  .src-list li{margin-bottom:12px}
+  .src-list .u{font-size:13px;color:var(--ink-3);word-break:break-all}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">概念学习资料 · 02 / 03</div>
+    <h1>大模型的上下文（Context）</h1>
+    <p class="sub">模型生成回复时能"看到"的所有文本——它没有真记忆，是上下文给了它记忆的错觉。</p>
+    <span class="tag">上下文窗口 · 工作记忆 · 记忆分层</span>
+  </header>
+
+  <section>
+    <div class="sec-h"><span class="no">01</span>个人解释</div>
+    <p>我的理解是：<b>上下文，就是大模型在回答你之前，脑子里一次性装进去的全部文字</b>。模型本身是"失忆"的——你每问一句，它都是从零开始生成。它之所以看起来"记得"你们聊过什么，是因为每一次都把前面的对话历史、系统设定、工具结果，连同你这句话一起塞进去。</p>
+    <p>我这几天有个真实的困惑：我隔了一天才再找 Kai，它怎么还认得我的账号、还知道上次网络被阻断、还记得"PAT 要勾 repo 主项"这个坑？后来明白，不是它"记得"，而是这些关键信息被写进了记忆文件，每次开新会话时又被自动塞进它的上下文里。</p>
+    <p>所以我的结论是：<b>上下文 = 大模型的"工作记忆"</b>。它是临时的、有容量上限的、用完就清空的一块草稿区，和它"学过的知识"（训练数据）是两回事。</p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">02</span>核心机制与组成</div>
+    <h3>上下文窗口（Context Window）</h3>
+    <p>上下文窗口是模型一次能容纳的 token 上限。Token 大致可理解为"半个词"，窗口越大，一次能处理的对话、文档、代码就越多。比如当前主流模型能做到 20 万甚至 100 万 token 的窗口——大约相当于几百页文字。</p>
+    <h3>一次请求里，什么会占上下文</h3>
+    <table>
+      <tr><th>成分</th><th>说明</th></tr>
+      <tr><td>系统提示（System Prompt）</td><td>告诉模型"你是谁、守什么规矩"，每次都在</td></tr>
+      <tr><td>对话历史</td><td>之前每一轮的用户消息和模型回复，逐轮累积</td></tr>
+      <tr><td>工具结果</td><td>模型调工具后拿到的返回值，也会回填进上下文</td></tr>
+      <tr><td>外部注入的记忆</td><td>把长期记忆文件、检索到的资料塞进来</td></tr>
+      <tr><td>本次要生成的输出</td><td>输出本身也占用窗口</td></tr>
+    </table>
+    <h3>一个反直觉的事实：上下文不是越长越好</h3>
+    <p class="quote">随着 token 数增长，准确率和召回会<b>下降</b>，这被称为 <b>context rot（上下文腐烂）</b>——所以"往上下文里塞什么"和"还剩多少空间"同样重要。</p>
+    <p class="note">这解释了为什么我让 Kai 干活时，它会主动读记忆文件、而不是把三天所有对话都摊开——精选有用信息，比堆得越多越好。</p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">03</span>一个具体应用场景</div>
+    <p><b>场景：连续三天、跨多次会话协作完成同一件事。</b></p>
+    <p>给课程搭 GitHub 仓库这件事，我前后找 Kai 好几天，中间换过好几次会话。每一次新会话开始，Kai 都不"记得"之前的事——是它的上下文被重新塞入了两样东西：一是系统设定（它叫什么、怎么和我沟通），二是记忆文件里沉淀的"网络会间歇性阻断""PAT 要勾 repo 主项""SSH 和 HTTPS 独立阻断"这些经验。</p>
+    <p>正因为这些关键信息被有选择地放进上下文，Kai 每次都能"接着上次"继续，而不是从零重新问我一遍账号、重新踩一遍坑。这就是上下文的威力：<b>它把"长期经验"转化成"当场可用的短期记忆"</b>。</p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">04</span>易混淆问题与使用边界</div>
+    <h3>最容易混淆的两点</h3>
+    <ul>
+      <li><b>上下文窗口 ≠ 训练数据。</b>训练数据是模型"学过的知识"，是它出厂前看过的海量文本；上下文窗口是它"当下能参考的草稿"，是这次请求临时装的文字。前者是长期知识，后者是短期记忆。</li>
+      <li><b>有上下文 ≠ 有真记忆。</b>模型没有真正的"记住"，它只是每次把历史重新喂进去。历史一旦超出窗口被截断，之前的内容就真的"忘"了。</li>
+    </ul>
+    <h3>使用边界</h3>
+    <ul>
+      <li><b>容量有限。</b>窗口会满，满了之后早期内容会被压缩或丢弃，所以长对话要主动做"记忆沉淀"，把关键结论落到外部文件，而不是指望模型一直记得。</li>
+      <li><b>塞太多会变差。</b>context rot 意味着"信息越多越准"是错觉，要给上下文做减法、做精选。</li>
+      <li><b>敏感信息会留在上下文里。</b>上下文里的内容会参与处理，因此不要把 API Key、密码这些随手贴进对话。</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">05</span>可核查资料来源</div>
+    <ul class="src-list">
+      <li>
+        <b>Context windows</b>（Claude 平台文档）—— 权威定义上下文窗口、token 累积方式与 context rot 现象。<br>
+        <span class="u">https://platform.claude.com/docs/en/build-with-claude/context-windows</span>
+      </li>
+      <li>
+        <b>How large is the context window?</b>（Anthropic 帮助中心）—— 各型号上下文窗口大小与自动上下文管理。<br>
+        <span class="u">https://support.anthropic.com/en/articles/8606394-how-large-is-claude-pro-s-context-window</span>
+      </li>
+    </ul>
+    <p class="note">"上下文窗口是工作记忆""context rot"等表述，来自第一份来源。</p>
+  </section>
+
+</div>
+</body>
+</html>

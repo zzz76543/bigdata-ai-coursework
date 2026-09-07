@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习 · Agent（智能体）</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --ink-2:#555; --ink-3:#8a8a8a;
+    --line:#e3e3e3; --bg:#fff; --bg-soft:#f7f7f5; --code-bg:#f4f4f4;
+    --accent:#1a7f37;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+       color:var(--ink);background:var(--bg);line-height:1.8;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:840px;margin:0 auto;padding:48px 28px 96px}
+  header{margin-bottom:36px;border-bottom:1px solid var(--line);padding-bottom:26px}
+  .kicker{font-size:12.5px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase;margin-bottom:12px}
+  h1{font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+  .sub{color:var(--ink-2);margin-top:12px;font-size:15.5px;max-width:62ch}
+  .tag{display:inline-block;margin-top:14px;font-size:12.5px;color:var(--accent);
+       border:1px solid var(--line);border-radius:20px;padding:4px 12px}
+  section{margin-top:44px}
+  .sec-h{display:flex;align-items:baseline;gap:12px;font-size:21px;font-weight:700;
+         margin-bottom:14px;letter-spacing:-.01em}
+  .sec-h .no{color:var(--ink-3);font-size:14px;font-weight:600;letter-spacing:.06em}
+  p{color:var(--ink);margin-bottom:12px}
+  p.note{color:var(--ink-2);font-size:14.5px}
+  .quote{border-left:3px solid var(--accent);background:var(--bg-soft);
+         padding:14px 18px;margin:16px 0;font-size:15px;color:var(--ink-2)}
+  .quote b{color:var(--ink)}
+  ul,ol{margin:10px 0 14px 22px}
+  li{margin-bottom:8px}
+  h3{font-size:16px;font-weight:650;margin:24px 0 10px}
+  table{width:100%;border-collapse:collapse;margin:14px 0 8px;font-size:14.5px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--bg-soft);font-weight:650;font-size:13.5px;white-space:nowrap}
+  code,pre{font-family:"SF Mono",ui-monospace,Consolas,Menlo,monospace}
+  code{background:var(--code-bg);padding:1px 6px;border-radius:4px;font-size:13.5px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--line)}
+  a:hover{border-color:var(--accent)}
+  .src-list li{margin-bottom:12px}
+  .src-list .u{font-size:13px;color:var(--ink-3);word-break:break-all}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">概念学习资料 · 01 / 03</div>
+    <h1>Agent（智能体）</h1>
+    <p class="sub">一个会自己动手、自己决定下一步该做什么的 AI——不只是回答问题，而是真正把事情办成。</p>
+    <span class="tag">大模型 · 工具调用 · 自主决策</span>
+  </header>
+
+  <section>
+    <div class="sec-h"><span class="no">01</span>个人解释</div>
+    <p>对我来说，<b>Agent（智能体）不是"会聊天的机器人"，而是"能自己动手干活的 AI"</b>。聊天机器人只会回答"怎么做"；Agent 会真的去把事做出来。</p>
+    <p>这一周我有切身体会：我让一个 AI（我叫它 Kai）帮我建 GitHub 课程仓库。它不是回我一句"你去网页上点这几个按钮"，而是自己去读文件、探测网络通不通、选推送通道、写脚本、把代码推上 GitHub。中间踩了好几个坑——令牌权限不够、凭证弹窗卡死——它自己诊断、换方案，最后把仓库推上去了。</p>
+    <p>所以我的理解是：<b>Agent = 大模型 + 能调用工具 + 能自己决定下一步</b>。模型负责"想"，工具负责"做"，而"自己决定下一步"才是它区别于普通对话的关键——它不是在一条写死的流程里走，而是根据每一步的结果动态调整。</p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">02</span>核心机制与组成</div>
+    <p>Agent 工作的本质是一个循环：<b>感知 → 决策 → 行动 → 观察结果 → 再决策</b>。它每走一步，都根据上一步的结果决定下一步，而不是一次性把路线定死。</p>
+    <h3>四个关键组成</h3>
+    <table>
+      <tr><th>组成</th><th>角色</th><th>我看到的对应物</th></tr>
+      <tr><td>大模型（大脑）</td><td>理解任务、拆解步骤、做决策</td><td>Kai 判断"该走 HTTPS 还是 SSH"</td></tr>
+      <tr><td>工具（手）</td><td>执行具体动作：读写文件、跑命令、调 API</td><td>Kai 跑 <code>git push</code>、调 GitHub API</td></tr>
+      <tr><td>记忆（经验）</td><td>记住上下文和过往经验，避免重复犯错</td><td>Kai 把"PAT 要勾 repo 主项"记进 MEMORY.md</td></tr>
+      <tr><td>编排（流程）</td><td>把上面几样串成一个可控循环</td><td>先探测网络 → 再选通道 → 再推送</td></tr>
+    </table>
+    <p class="note">Anthropic 在《Building effective agents》里画了一条重要界线：<b>工作流（workflow）</b>是"代码写死的固定路径"，<b>Agent</b>是"模型自己决定路径"。很多场景用简单工作流就够，只有当任务需要模型临场决策时才值得升级成 Agent。</p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">03</span>一个具体应用场景</div>
+    <p><b>场景：给一门课程搭一个能持续维护的 GitHub 作业仓库。</b></p>
+    <p>这个任务表面是"建个仓库"，实际是一串需要临场判断的子任务：网络被阻断要走哪个通道？SSH 和 HTTPS 哪个此刻通？令牌权限对不对？推不上去是网络问题还是配置问题？这些问题没法预先写死，只能边走边判断。</p>
+    <p>Agent 在这里的价值就体现出来了：它先探测各通道状态，发现 HTTPS 通、SSH 断，就用 HTTPS 推；推的时候卡在凭证弹窗，它就诊断出是 <code>credential-helper-selector</code> 在等用户点击，于是改走 URL 内嵌令牌绕过；最后再把这套"绕代理 + 禁弹窗 + 内嵌令牌"的办法沉淀成一个可复用的函数。</p>
+    <p>整个过程中，人只需要做两件机器做不了的事：登录账号、点一次"确认"。其余判断和执行都交给了 Agent。</p>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">04</span>易混淆问题与使用边界</div>
+    <h3>最容易混淆的两点</h3>
+    <ul>
+      <li><b>Agent ≠ 聊天机器人。</b>聊天机器人只生成文字；Agent 会调用工具、改文件、跑命令、产生副作用。判断标准可以借用一句话："如果大模型能改变程序的控制流，它才是 Agent；如果流程是代码写死的，它就不是。"</li>
+      <li><b>Agent ≠ 越复杂越好。</b>Agent 用更长的耗时和更高的成本换更强的任务能力，不是所有任务都值得。能用一个函数搞定的事，别硬上 Agent。</li>
+    </ul>
+    <h3>使用边界（它做不到什么）</h3>
+    <ul>
+      <li><b>不是无限自主。</b>好的 Agent 有明确边界：不删不该删的文件、不碰个人隐私、做危险操作前要人确认。我这几天就观察到它在"删文件""改配置"这类事上会先征求同意。</li>
+      <li><b>不能替你承担后果。</b>Agent 做的外部动作（发邮件、推代码、公开内容）后果仍由人负责，所以关键动作需要人把关。</li>
+      <li><b>会犯错，且可能自信地犯错。</b>它给的结论要能验证，不能因为是 Agent 说的就全盘接受。</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="no">05</span>可核查资料来源</div>
+    <ul class="src-list">
+      <li>
+        <b>Building Effective Agents</b>（Anthropic 工程团队，2024）—— 系统区分 workflow 与 agent、给出设计原则的一手文章。<br>
+        <span class="u">https://www.anthropic.com/engineering/building-effective-agents</span>
+      </li>
+      <li>
+        <b>Agent Skills Overview</b>（Claude 平台文档）—— 说明 Agent 如何通过 Skill 获得新能力。<br>
+        <span class="u">https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview</span>
+      </li>
+    </ul>
+    <p class="note">本文"工作流 vs Agent"的区分、以及"能用简单方案就别上 Agent"的观点，均来自第一份来源。</p>
+  </section>
+
+</div>
+</body>
+</html>
